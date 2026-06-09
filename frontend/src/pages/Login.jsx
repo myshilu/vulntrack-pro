@@ -11,9 +11,7 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (user) {
-      navigate('/dashboard');
-    }
+    if (user) navigate('/dashboard');
   }, [user, navigate]);
 
   const handleSubmit = async (e) => {
@@ -31,34 +29,29 @@ const Login = () => {
   };
 
   return (
-    <div className="container" style={{ marginLeft: '220px', paddingTop: '5rem' }}>
-      <h2>Login</h2>
-      <form onSubmit={handleSubmit}>
-        <label htmlFor="email">Email</label>
-        <input
-          type="email"
-          id="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-        <label htmlFor="password">Password</label>
-        <input
-          type="password"
-          id="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-        {error && <p style={{ color: '#f87171' }}>{error}</p>}
-        <button type="submit" className="primary" disabled={loading}>
-          {loading ? 'Logging in...' : 'Login'}
-        </button>
-      </form>
-      <p style={{ marginTop: '1rem' }}>
-        Don't have an account? <Link to="/register">Register</Link>
-      </p>
-    </div>
+    <main className="auth-wrap">
+      <section className="auth-card">
+        <h1 className="page-title">VulnTrack Pro</h1>
+        <p className="page-subtitle">Sign in to manage vulnerability reports.</p>
+        <form onSubmit={handleSubmit} style={{ marginTop: '22px' }}>
+          <label htmlFor="email">
+            Email
+            <input type="email" id="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+          </label>
+          <label htmlFor="password">
+            Password
+            <input type="password" id="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+          </label>
+          {error && <p className="error">{error}</p>}
+          <button type="submit" className="primary" disabled={loading}>
+            {loading ? 'Logging in...' : 'Login'}
+          </button>
+        </form>
+        <p className="muted" style={{ marginTop: '16px' }}>
+          Need an account? <Link to="/register">Register</Link>
+        </p>
+      </section>
+    </main>
   );
 };
 

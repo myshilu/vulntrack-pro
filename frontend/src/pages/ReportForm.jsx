@@ -31,18 +31,16 @@ const ReportForm = () => {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    if (isEdit) {
-      // Fetch report data
-      const fetchReport = async () => {
-        try {
-          const res = await api.get(`/reports/${id}`);
-          setFormData(res.data);
-        } catch (err) {
-          setError('Failed to load report');
-        }
-      };
-      fetchReport();
-    }
+    if (!isEdit) return;
+    const fetchReport = async () => {
+      try {
+        const res = await api.get(`/reports/${id}`);
+        setFormData(res.data);
+      } catch {
+        setError('Failed to load report');
+      }
+    };
+    fetchReport();
   }, [id, isEdit]);
 
   const handleChange = (e) => {
@@ -56,7 +54,6 @@ const ReportForm = () => {
     setError('');
     try {
       if (isEdit) {
-        // update
         await api.put(`/reports/${id}`, formData);
       } else {
         await api.post('/reports', formData);
@@ -70,96 +67,145 @@ const ReportForm = () => {
   };
 
   return (
-    <div className="container" style={{ marginLeft: '220px', paddingTop: '5rem' }}>
-      <h2>{isEdit ? 'Edit Report' : 'Create Report'}</h2>
-      {error && <p style={{ color: '#f87171' }}>{error}</p>}
-      <form onSubmit={handleSubmit}>
-        <label htmlFor="title">Title*</label>
-        <input id="title" name="title" value={formData.title} onChange={handleChange} required />
+    <main className="container">
+      <div className="page-header">
+        <div>
+          <h1 className="page-title">{isEdit ? 'Edit Report' : 'Create Report'}</h1>
+          <p className="page-subtitle">Capture the technical evidence, impact, and remediation path.</p>
+        </div>
+      </div>
 
-        <label htmlFor="vulnerability_type">Vulnerability Type*</label>
-        <select name="vulnerability_type" id="vulnerability_type" value={formData.vulnerability_type} onChange={handleChange} required>
-          <option value="">Select...</option>
-          <option value="Broken Access Control">Broken Access Control</option>
-          <option value="IDOR">IDOR</option>
-          <option value="SQL Injection">SQL Injection</option>
-          <option value="Cross-Site Scripting">Cross-Site Scripting</option>
-          <option value="CSRF">CSRF</option>
-          <option value="SSRF">SSRF</option>
-          <option value="Authentication Failure">Authentication Failure</option>
-          <option value="Security Misconfiguration">Security Misconfiguration</option>
-          <option value="Sensitive Data Exposure">Sensitive Data Exposure</option>
-          <option value="Other">Other</option>
-        </select>
+      <section className="panel">
+        {error && <p className="error">{error}</p>}
+        <form onSubmit={handleSubmit}>
+          <div className="form-grid">
+            <label className="full" htmlFor="title">
+              Title*
+              <input id="title" name="title" value={formData.title} onChange={handleChange} required />
+            </label>
 
-        <label htmlFor="severity">Severity*</label>
-        <select name="severity" id="severity" value={formData.severity} onChange={handleChange} required>
-          <option value="Critical">Critical</option>
-          <option value="High">High</option>
-          <option value="Medium">Medium</option>
-          <option value="Low">Low</option>
-          <option value="Informational">Informational</option>
-        </select>
+            <label htmlFor="vulnerability_type">
+              Vulnerability Type*
+              <select name="vulnerability_type" id="vulnerability_type" value={formData.vulnerability_type} onChange={handleChange} required>
+                <option value="">Select...</option>
+                <option value="Broken Access Control">Broken Access Control</option>
+                <option value="IDOR">IDOR</option>
+                <option value="SQL Injection">SQL Injection</option>
+                <option value="Cross-Site Scripting">Cross-Site Scripting</option>
+                <option value="CSRF">CSRF</option>
+                <option value="SSRF">SSRF</option>
+                <option value="Authentication Failure">Authentication Failure</option>
+                <option value="Security Misconfiguration">Security Misconfiguration</option>
+                <option value="Sensitive Data Exposure">Sensitive Data Exposure</option>
+                <option value="Other">Other</option>
+              </select>
+            </label>
 
-        <label htmlFor="status">Status*</label>
-        <select name="status" id="status" value={formData.status} onChange={handleChange} required>
-          <option value="New">New</option>
-          <option value="Triaged">Triaged</option>
-          <option value="In Progress">In Progress</option>
-          <option value="Resolved">Resolved</option>
-          <option value="Closed">Closed</option>
-        </select>
+            <label htmlFor="severity">
+              Severity*
+              <select name="severity" id="severity" value={formData.severity} onChange={handleChange} required>
+                <option value="Critical">Critical</option>
+                <option value="High">High</option>
+                <option value="Medium">Medium</option>
+                <option value="Low">Low</option>
+                <option value="Informational">Informational</option>
+              </select>
+            </label>
 
-        <label htmlFor="affected_url">Affected URL*</label>
-        <input id="affected_url" name="affected_url" value={formData.affected_url} onChange={handleChange} required />
+            <label htmlFor="status">
+              Status*
+              <select name="status" id="status" value={formData.status} onChange={handleChange} required>
+                <option value="New">New</option>
+                <option value="Triaged">Triaged</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Resolved">Resolved</option>
+                <option value="Closed">Closed</option>
+              </select>
+            </label>
 
-        <label htmlFor="endpoint">Endpoint*</label>
-        <input id="endpoint" name="endpoint" value={formData.endpoint} onChange={handleChange} required />
+            <label htmlFor="http_method">
+              HTTP Method*
+              <select name="http_method" id="http_method" value={formData.http_method} onChange={handleChange} required>
+                <option value="GET">GET</option>
+                <option value="POST">POST</option>
+                <option value="PUT">PUT</option>
+                <option value="PATCH">PATCH</option>
+                <option value="DELETE">DELETE</option>
+              </select>
+            </label>
 
-        <label htmlFor="http_method">HTTP Method*</label>
-        <select name="http_method" id="http_method" value={formData.http_method} onChange={handleChange} required>
-          <option value="GET">GET</option>
-          <option value="POST">POST</option>
-          <option value="PUT">PUT</option>
-          <option value="PATCH">PATCH</option>
-          <option value="DELETE">DELETE</option>
-        </select>
+            <label htmlFor="affected_url">
+              Affected URL*
+              <input id="affected_url" name="affected_url" value={formData.affected_url} onChange={handleChange} required />
+            </label>
 
-        <label htmlFor="vulnerable_parameter">Vulnerable Parameter</label>
-        <input id="vulnerable_parameter" name="vulnerable_parameter" value={formData.vulnerable_parameter || ''} onChange={handleChange} />
+            <label htmlFor="endpoint">
+              Endpoint*
+              <input id="endpoint" name="endpoint" value={formData.endpoint} onChange={handleChange} required />
+            </label>
 
-        <label htmlFor="description">Technical Description*</label>
-        <textarea id="description" name="description" value={formData.description} onChange={handleChange} required rows="3" />
+            <label htmlFor="vulnerable_parameter">
+              Vulnerable Parameter
+              <input id="vulnerable_parameter" name="vulnerable_parameter" value={formData.vulnerable_parameter || ''} onChange={handleChange} />
+            </label>
 
-        <label htmlFor="steps_to_reproduce">Steps to Reproduce*</label>
-        <textarea id="steps_to_reproduce" name="steps_to_reproduce" value={formData.steps_to_reproduce} onChange={handleChange} required rows="3" />
+            <label className="full" htmlFor="description">
+              Technical Description*
+              <textarea id="description" name="description" value={formData.description} onChange={handleChange} required rows="4" />
+            </label>
 
-        <label htmlFor="actual_result">Actual Result*</label>
-        <textarea id="actual_result" name="actual_result" value={formData.actual_result} onChange={handleChange} required rows="2" />
+            <label className="full" htmlFor="steps_to_reproduce">
+              Steps to Reproduce*
+              <textarea id="steps_to_reproduce" name="steps_to_reproduce" value={formData.steps_to_reproduce} onChange={handleChange} required rows="4" />
+            </label>
 
-        <label htmlFor="expected_result">Expected Result*</label>
-        <textarea id="expected_result" name="expected_result" value={formData.expected_result} onChange={handleChange} required rows="2" />
+            <label htmlFor="actual_result">
+              Actual Result*
+              <textarea id="actual_result" name="actual_result" value={formData.actual_result} onChange={handleChange} required rows="3" />
+            </label>
 
-        <label htmlFor="impact">Security Impact*</label>
-        <textarea id="impact" name="impact" value={formData.impact} onChange={handleChange} required rows="2" />
+            <label htmlFor="expected_result">
+              Expected Result*
+              <textarea id="expected_result" name="expected_result" value={formData.expected_result} onChange={handleChange} required rows="3" />
+            </label>
 
-        <label htmlFor="remediation">Recommended Remediation*</label>
-        <textarea id="remediation" name="remediation" value={formData.remediation} onChange={handleChange} required rows="2" />
+            <label htmlFor="impact">
+              Security Impact*
+              <textarea id="impact" name="impact" value={formData.impact} onChange={handleChange} required rows="3" />
+            </label>
 
-        <label htmlFor="raw_request">Raw HTTP Request</label>
-        <textarea id="raw_request" name="raw_request" value={formData.raw_request || ''} onChange={handleChange} rows="2" />
+            <label htmlFor="remediation">
+              Recommended Remediation*
+              <textarea id="remediation" name="remediation" value={formData.remediation} onChange={handleChange} required rows="3" />
+            </label>
 
-        <label htmlFor="raw_response">Raw HTTP Response</label>
-        <textarea id="raw_response" name="raw_response" value={formData.raw_response || ''} onChange={handleChange} rows="2" />
+            <label htmlFor="raw_request">
+              Raw HTTP Request
+              <textarea id="raw_request" name="raw_request" value={formData.raw_request || ''} onChange={handleChange} rows="3" />
+            </label>
 
-        <label htmlFor="notes">Researcher Notes</label>
-        <textarea id="notes" name="notes" value={formData.notes || ''} onChange={handleChange} rows="2" />
+            <label htmlFor="raw_response">
+              Raw HTTP Response
+              <textarea id="raw_response" name="raw_response" value={formData.raw_response || ''} onChange={handleChange} rows="3" />
+            </label>
 
-        <button type="submit" className="primary" disabled={loading}>
-          {loading ? 'Saving...' : isEdit ? 'Update Report' : 'Create Report'}
-        </button>
-      </form>
-    </div>
+            <label className="full" htmlFor="notes">
+              Researcher Notes
+              <textarea id="notes" name="notes" value={formData.notes || ''} onChange={handleChange} rows="3" />
+            </label>
+          </div>
+
+          <div className="actions">
+            <button type="submit" className="primary" disabled={loading}>
+              {loading ? 'Saving...' : isEdit ? 'Update Report' : 'Create Report'}
+            </button>
+            <button type="button" className="secondary" onClick={() => navigate('/reports')}>
+              Cancel
+            </button>
+          </div>
+        </form>
+      </section>
+    </main>
   );
 };
 

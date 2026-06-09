@@ -12,16 +12,14 @@ const Register = () => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (user) {
-      navigate('/dashboard');
-    }
+    if (user) navigate('/dashboard');
   }, [user, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     if (password !== confirmPassword) {
-      setError("Passwords do not match");
+      setError('Passwords do not match');
       return;
     }
     setLoading(true);
@@ -36,42 +34,39 @@ const Register = () => {
   };
 
   return (
-    <div className="container" style={{ marginLeft: '220px', paddingTop: '5rem' }}>
-      <h2>Register</h2>
-      <form onSubmit={handleSubmit}>
-        <label htmlFor="email">Email</label>
-        <input
-          type="email"
-          id="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-        <label htmlFor="password">Password</label>
-        <input
-          type="password"
-          id="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-        <label htmlFor="confirmPassword">Confirm Password</label>
-        <input
-          type="password"
-          id="confirmPassword"
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          required
-        />
-        {error && <p style={{ color: '#f87171' }}>{error}</p>}
-        <button type="submit" className="primary" disabled={loading}>
-          {loading ? 'Registering...' : 'Register'}
-        </button>
-      </form>
-      <p style={{ marginTop: '1rem' }}>
-        Already have an account? <Link to="/login">Login</Link>
-      </p>
-    </div>
+    <main className="auth-wrap">
+      <section className="auth-card">
+        <h1 className="page-title">Create Account</h1>
+        <p className="page-subtitle">Start tracking vulnerability reports in your workspace.</p>
+        <form onSubmit={handleSubmit} style={{ marginTop: '22px' }}>
+          <label htmlFor="email">
+            Email
+            <input type="email" id="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+          </label>
+          <label htmlFor="password">
+            Password
+            <input type="password" id="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+          </label>
+          <label htmlFor="confirmPassword">
+            Confirm Password
+            <input
+              type="password"
+              id="confirmPassword"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              required
+            />
+          </label>
+          {error && <p className="error">{error}</p>}
+          <button type="submit" className="primary" disabled={loading}>
+            {loading ? 'Registering...' : 'Register'}
+          </button>
+        </form>
+        <p className="muted" style={{ marginTop: '16px' }}>
+          Already registered? <Link to="/login">Login</Link>
+        </p>
+      </section>
+    </main>
   );
 };
 

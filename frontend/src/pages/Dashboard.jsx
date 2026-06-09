@@ -1,6 +1,5 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import api from '../services/api';
-import { AuthContext } from '../context/AuthContext';
 import {
   BarChart,
   Bar,
@@ -12,9 +11,9 @@ import {
 } from 'recharts';
 
 const statusClass = (status) => `status-${status.toLowerCase().replace(/\s+/g, '-')}`;
+const severities = ['Critical', 'High', 'Medium', 'Low', 'Informational'];
 
 const Dashboard = () => {
-  const { user } = useContext(AuthContext);
   const [stats, setStats] = useState(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
@@ -25,9 +24,8 @@ const Dashboard = () => {
       try {
         const res = await api.get('/dashboard/stats');
         setStats(res.data);
-      } catch (err) {
+      } catch {
         setError('Failed to load dashboard');
-        console.error(err);
       } finally {
         setLoading(false);
       }
@@ -35,75 +33,81 @@ const Dashboard = () => {
     fetchStats();
   }, []);
 
-  if (loading) {
-    return <div className="loading">Loading...</div>;
-  }
-  if (error) {
-    return <div className="container" style={{ marginLeft: '220px', paddingTop: '5rem' }}>{error}</div>;
-  }
-  if (!stats) {
-    return null;
-  }
-  // Prepare data for charts
+  if (loading) return <div className="loading">Loading dashboard...</div>;
+  if (error) return <div className="container error">{error}</div>;
+  if (!stats) return null;
+
   const severityData = Object.entries(stats.severity_counts).map(([name, value]) => ({ name, value }));
   const statusData = Object.entries(stats.status_counts).map(([name, value]) => ({ name, value }));
 
   return (
-    <div className="container" style={{ marginLeft: '220px', paddingTop: '5rem' }}>
-      <h2>Dashboard</h2>
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', marginBottom: '2rem' }}>
-        <div style={{ flex: '1 1 200px', backgroundColor: '#27304e', padding: '1rem', borderRadius: '6px' }}>
-          <h3>Total Reports</h3>
-          <p style={{ fontSize: '2rem', margin: 0 }}>{stats.total_reports}</p>
+    <main className="container">
+      <div className="page-header">
+        <div>
+          <h1 className="page-title">Dashboard</h1>
+          <p className="page-subtitle">Operational view of vulnerability volume, severity, and workflow status.</p>
         </div>
-        {['Critical', 'High', 'Medium', 'Low', 'Informational'].map((sev) => (
-          <div key={sev} style={{ flex: '1 1 150px', backgroundColor: '#27304e', padding: '1rem', borderRadius: '6px' }}>
-            <h4>{sev}</h4>
-            <p style={{ fontSize: '1.5rem', margin: 0 }}>{stats.severity_counts[sev] || 0}</p>
+      </div>
+
+      <section className="stats-grid">
+        <div className="stat-card">
+          <span className="stat-label">Total reports</span>
+          <p className="stat-value">{stats.total_reports}</p>
+        </div>
+        {severities.map((severity) => (
+          <div className="stat-card" key={severity}>
+            <span className="stat-label">{severity}</span>
+            <p className="stat-value">{stats.severity_counts[severity] || 0}</p>
           </div>
         ))}
-      </div>
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2rem' }}>
-        <div style={{ flex: '1 1 300px', minWidth: '300px', height: '300px', backgroundColor: '#27304e', padding: '1rem', borderRadius: '6px' }}>
+      </section>
+
+      <section className="chart-grid">
+        <div className="panel chart-panel">
           <h3>Severity Distribution</h3>
-          <ResponsiveContainer width="100%" height="80%">
-            <BarChart data={severityData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-              <XAxis dataKey="name" stroke="#f5f5f5" />
-              <YAxis stroke="#f5f5f5" allowDecimals={false} />
-              <Tooltip contentStyle={{ backgroundColor: '#1e293b', border: 'none' }} cursor={{ fill: '#334155' }} />
+          <ResponsiveContainer width="100%" height="82%">
+            <BarChart data={severityData} margin={{ top: 10, right: 18, left: 0, bottom: 0 }}>
+              <XAxis dataKey="name" stroke="#65716b" />
+              <YAxis stroke="#65716b" allowDecimals={false} />
+              <Tooltip contentStyle={{ backgroundColor: '#ffffff', border: '1px solid #dce2dd' }} />
               <Legend />
-              <Bar dataKey="value" fill="#3b82f6" />
+              <Bar dataKey="value" fill="#0f766e" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
-        <div style={{ flex: '1 1 300px', minWidth: '300px', height: '300px', backgroundColor: '#27304e', padding: '1rem', borderRadius: '6px' }}>
+        <div className="panel chart-panel">
           <h3>Status Distribution</h3>
-          <ResponsiveContainer width="100%" height="80%">
-            <BarChart data={statusData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-              <XAxis dataKey="name" stroke="#f5f5f5" />
-              <YAxis stroke="#f5f5f5" allowDecimals={false} />
-              <Tooltip contentStyle={{ backgroundColor: '#1e293b', border: 'none' }} cursor={{ fill: '#334155' }} />
+          <ResponsiveContainer width="100%" height="82%">
+            <BarChart data={statusData} margin={{ top: 10, right: 18, left: 0, bottom: 0 }}>
+              <XAxis dataKey="name" stroke="#65716b" />
+              <YAxis stroke="#65716b" allowDecimals={false} />
+              <Tooltip contentStyle={{ backgroundColor: '#ffffff', border: '1px solid #dce2dd' }} />
               <Legend />
-              <Bar dataKey="value" fill="#10b981" />
+              <Bar dataKey="value" fill="#b54708" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
-      </div>
-      <div style={{ marginTop: '2rem' }}>
+      </section>
+
+      <section className="panel" style={{ marginTop: '18px' }}>
         <h3>Recent Reports</h3>
-        {stats.recent_reports.length === 0 && <p>No recent reports.</p>}
-        {stats.recent_reports.map((report) => (
-          <div key={report.id} style={{ backgroundColor: '#27304e', padding: '1rem', borderRadius: '6px', marginBottom: '1rem' }}>
-            <h4 style={{ margin: 0 }}>{report.title}</h4>
-            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-              <span className={`badge ${report.severity}`}>{report.severity}</span>
-              <span className={`badge ${statusClass(report.status)}`}>{report.status}</span>
-              <span style={{ fontSize: '0.8rem', color: '#9ca3af' }}>{new Date(report.created_at).toLocaleString()}</span>
+        <div className="recent-list">
+          {stats.recent_reports.length === 0 && <p className="muted">No recent reports.</p>}
+          {stats.recent_reports.map((report) => (
+            <div key={report.id} className="recent-item">
+              <div>
+                <strong>{report.title}</strong>
+                <div className="report-meta">
+                  <span className={`badge ${report.severity}`}>{report.severity}</span>
+                  <span className={`badge ${statusClass(report.status)}`}>{report.status}</span>
+                </div>
+              </div>
+              <span className="muted">{new Date(report.created_at).toLocaleString()}</span>
             </div>
-          </div>
-        ))}
-      </div>
-    </div>
+          ))}
+        </div>
+      </section>
+    </main>
   );
 };
 
