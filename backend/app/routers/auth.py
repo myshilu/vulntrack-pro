@@ -70,7 +70,7 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db=Depends(get_db)):
     password = form_data.password
     cur = db.cursor()
     # Look up user
-    cur.execute("SELECT id, password_hash, salt FROM users WHERE email = ?", (email,))
+    cur.execute("SELECT id, email, password_hash, salt FROM users WHERE email = ?", (email,))
     user_row = cur.fetchone()
     if not user_row:
         # Do not reveal whether the account exists
@@ -80,14 +80,9 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db=Depends(get_db)):
     salt = user_row["salt"]
     if not security.verify_password(password, salt, pw_hash):
         raise HTTPException(status_code=400, detail="Incorrect email or password")
-    # Delete existing sessions for this user (optional but prevents token buildup)
+    token = security.create_access_token(user_id=user_id, email=user_row["email"])
     cur.execute("DELETE FROM sessions WHERE user_id = ?", (user_id,))
-    # Generate a new token and store it
-    token = security.generate_session_token()
-    cur.execute(
-        "INSERT INTO sessions (user_id, token) VALUES (?, ?)",
-        (user_id, token),
-    )
+    cur.execute("INSERT INTO sessions (user_id, token) VALUES (?, ?)", (user_id, token))
     db.commit()
     return schemas.Token(access_token=token, token_type="bearer")
 

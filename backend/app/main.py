@@ -32,11 +32,20 @@ def get_cors_origins() -> list[str]:
     return [origin.strip() for origin in raw_origins.split(",") if origin.strip()]
 
 
+def get_cors_origin_regex() -> str | None:
+    """Allow configured Vercel frontend deployment aliases without wildcard CORS."""
+    return os.getenv(
+        "CORS_ORIGIN_REGEX",
+        r"https://vulntrack-pro-frontend([a-z0-9-]*)?\.vercel\.app",
+    )
+
+
 app = FastAPI(title="VulnTrack Pro API", debug=False, lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=get_cors_origins(),
+    allow_origin_regex=get_cors_origin_regex(),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

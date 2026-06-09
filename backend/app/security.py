@@ -20,7 +20,11 @@ subsequent requests.
 
 from __future__ import annotations
 
+import base64
+import hmac
 import hashlib
+import json
+import os
 import secrets
 from typing import Tuple
 
@@ -57,3 +61,31 @@ def generate_session_token() -> str:
     Base64 alphabet. It can be safely embedded in HTTP headers.
     """
     return secrets.token_urlsafe(32)
+
+
+def _sign(message: bytes) -> str:
+    secret = os.getenv("SESSION_SECRET") or os.getenv("JWT_SECRET") or "local-development-session-secret"
+    return hmac.new(secret.encode("utf-8"), message, hashlib.sha256).hexdigest()
+
+
+def create_access_token(user_id: int, email: str) -> str:
+    """Create a signed bearer token that does not depend on session storage."""
+    payload = json.dumps({"user_id": user_id, "email": email}, separators=(",", ":")).encode("utf-8")
+    body = base64.urlsafe_b64encode(payload).decode("ascii").rstrip("=")
+    signature = _sign(body.encode("ascii"))
+    return f"vtp.{body}.{signature}"
+
+
+def verify_access_token(token: str) -> dict | None:
+    """Verify and decode a signed bearer token."""
+    try:
+      prefix, body, signature = token.split(".", 2)
+      if prefix != "vtp":
+          return None
+      expected = _sign(body.encode("ascii"))
+      if not hmac.compare_digest(expected, signature):
+          return None
+      padded_body = body + ("=" * (-len(body) % 4))
+      return json.loads(base64.urlsafe_b64decode(padded_body.encode("ascii")))
+    except Exception:
+      return None

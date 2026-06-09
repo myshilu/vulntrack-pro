@@ -20,6 +20,7 @@ from typing import Generator
 from fastapi import Depends, Header, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 
+from . import security
 from .database import get_connection
 
 # The OAuth2PasswordBearer utility extracts a bearer token from the
@@ -61,6 +62,17 @@ def get_current_user(token: str = Depends(oauth2_scheme), db=Depends(get_db)):
         # No token provided
         raise credentials_exception
     cur = db.cursor()
+    token_data = security.verify_access_token(token)
+    if token_data is not None:
+        cur.execute(
+            "SELECT id, email, password_hash, salt, created_at FROM users WHERE id = ?",
+            (token_data.get("user_id"),),
+        )
+        user_row = cur.fetchone()
+        if user_row is None:
+            raise credentials_exception
+        return user_row
+
     # Look up the session by token
     cur.execute("SELECT user_id FROM sessions WHERE token = ?", (token,))
     session_row = cur.fetchone()
