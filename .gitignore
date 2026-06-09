@@ -1,0 +1,40 @@
+# Environment and secrets
+.env
+.env.*
+!.env.example
+backend/.env
+frontend/.env
+
+# Local databases
+*.db
+*.sqlite
+*.sqlite3
+
+# Python
+backend/venv/
+venv/
+__pycache__/
+**/__pycache__/
+*.pyc
+.pytest_cache/
+
+# Node and frontend builds
+node_modules/
+frontend/node_modules/
+dist/
+frontend/dist/
+build/
+
+# Editors and OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Logs and local runtime output
+logs/
+*.log
+.vulntrack-launcher.log
+
+# Local portable tooling
+.tools/
