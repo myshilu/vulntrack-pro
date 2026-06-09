@@ -48,6 +48,17 @@ app.include_router(reports.router)
 app.include_router(dashboard.router)
 
 
+@app.get("/")
+def api_root() -> dict:
+    """Friendly landing response for the public backend base URL."""
+    return {
+        "name": "VulnTrack Pro API",
+        "status": "running",
+        "health": "/api/health",
+        "docs": "/docs",
+    }
+
+
 @app.get("/api/health")
 def health_check() -> dict:
     """Simple health check endpoint."""
