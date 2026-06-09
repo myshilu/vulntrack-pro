@@ -38,3 +38,8 @@ logs/
 
 # Local portable tooling
 .tools/
+
+# Vercel local project links
+.vercel/
+
+.vercel
