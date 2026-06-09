@@ -14,13 +14,23 @@ written manually and must be kept in sync with the Pydantic schemas in
 
 from __future__ import annotations
 
+import os
 import sqlite3
 from pathlib import Path
 
-# Path to the SQLite database file. The database file is created if it
-# doesn't exist. It sits one directory above this module (i.e., at
-# ``backend/vulntrack.db``).
-DB_PATH = Path(__file__).resolve().parent.parent / "vulntrack.db"
+
+def _default_db_path() -> Path:
+    """Choose a writable SQLite path for local, Render, and Vercel demos."""
+    if os.getenv("DATABASE_PATH"):
+        return Path(os.getenv("DATABASE_PATH", ""))
+    if os.getenv("VERCEL"):
+        return Path("/tmp/vulntrack.db")
+    return Path(__file__).resolve().parent.parent / "vulntrack.db"
+
+
+# Path to the SQLite database file. The database file is created if it doesn't
+# exist. On Vercel's read-only runtime, the demo database lives in /tmp.
+DB_PATH = _default_db_path()
 
 
 def get_connection() -> sqlite3.Connection:
